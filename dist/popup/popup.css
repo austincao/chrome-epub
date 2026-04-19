@@ -1,0 +1,130 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f2e6;
+  --panel: rgba(255, 250, 241, 0.92);
+  --border: rgba(83, 55, 19, 0.16);
+  --ink: #2f2417;
+  --muted: #6b5b4a;
+  --accent: #9c4a1a;
+  --accent-strong: #7c350f;
+  --shadow: 0 16px 36px rgba(78, 50, 15, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 360px;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Songti SC", serif;
+  background:
+    radial-gradient(circle at top right, rgba(197, 121, 41, 0.15), transparent 48%),
+    linear-gradient(180deg, #fff9ef, var(--bg));
+  color: var(--ink);
+}
+
+.popup {
+  padding: 18px;
+}
+
+.hero h1 {
+  margin: 0.18rem 0 0.45rem;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+  color: var(--accent);
+}
+
+.description {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.panel {
+  margin-top: 14px;
+  padding: 14px 15px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.compact {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.label {
+  margin: 0 0 6px;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.page-url,
+.settings-summary,
+.status {
+  margin: 6px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.export-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #b75620, var(--accent-strong));
+  color: #fff9f3;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(124, 53, 15, 0.28);
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.export-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.export-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.link-button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-strong);
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+

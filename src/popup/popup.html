@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page to EPUB</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <section class="hero">
+        <p class="eyebrow">Page to EPUB</p>
+        <h1>将当前文章转成可阅读的 EPUB</h1>
+        <p class="description">面向 blog 和新闻正文，保留基础排版，默认下载到浏览器下载目录。</p>
+      </section>
+
+      <section class="panel">
+        <p class="label">当前页面</p>
+        <p id="page-title" class="page-title">正在读取标签页标题...</p>
+        <p id="page-url" class="page-url"></p>
+      </section>
+
+      <section class="panel compact">
+        <p class="label">导出设置</p>
+        <p id="settings-summary" class="settings-summary"></p>
+      </section>
+
+      <button id="export-button" class="export-button" type="button">转为 EPUB</button>
+      <p id="status" class="status"></p>
+
+      <footer class="footer">
+        <button id="open-options" class="link-button" type="button">打开设置</button>
+      </footer>
+    </main>
+
+    <script type="module" src="../popup.js"></script>
+  </body>
+</html>

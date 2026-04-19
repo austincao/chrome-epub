@@ -1,0 +1,11 @@
+node_modules
+# dist  <-- 按照用户要求移除排除
+test-results
+playwright-report
+playwright/.cache
+
+# 安全性规则
+*.key
+*.crx
+*.zip
+.DS_Store

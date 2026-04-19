@@ -1,0 +1,22 @@
+{
+  "name": "chrome-epub-exporter",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Chrome extension that converts article pages into EPUB files.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "clean": "rm -rf dist",
+    "dev": "node scripts/build.mjs --watch",
+    "test:e2e": "node scripts/verify-download-filename-unit.mjs && node scripts/build.mjs && playwright test tests/e2e"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "crx": "^5.0.1",
+    "esbuild": "^0.27.4"
+  }
+}

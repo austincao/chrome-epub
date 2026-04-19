@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page to EPUB 设置</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <p class="eyebrow">Page to EPUB</p>
+        <h1>导出设置</h1>
+        <p class="lead">控制默认下载目录、正文图片、链接和基础样式保留策略。</p>
+      </section>
+
+      <form id="options-form" class="card">
+        <label class="field">
+          <span class="field-label">下载子目录</span>
+          <input id="download-folder" name="downloadFolder" type="text" maxlength="80" placeholder="EPUB" />
+          <small>最终保存位置会是浏览器下载目录下的相对子目录，例如 `Downloads/EPUB/`。</small>
+        </label>
+
+        <label class="toggle">
+          <input id="include-images" name="includeImages" type="checkbox" />
+          <span>导出正文图片</span>
+        </label>
+
+        <label class="toggle">
+          <input id="include-links" name="includeLinks" type="checkbox" />
+          <span>保留正文中的超链接</span>
+        </label>
+
+        <label class="toggle">
+          <input id="preserve-colors" name="preserveColors" type="checkbox" />
+          <span>保留内联颜色和部分文字强调</span>
+        </label>
+
+        <label class="toggle">
+          <input id="preserve-text-transform" name="preserveTextTransform" type="checkbox" />
+          <span>保留大写/小写转换</span>
+        </label>
+
+        <label class="toggle">
+          <input id="save-as" name="saveAs" type="checkbox" />
+          <span>每次下载时手动选择保存位置</span>
+        </label>
+
+        <div class="actions">
+          <button class="save-button" type="submit">保存设置</button>
+          <p id="status" class="status"></p>
+        </div>
+      </form>
+
+      <section class="notes">
+        <h2>说明</h2>
+        <p>插件默认通过 `chrome.downloads` 写入浏览器下载目录。如果你在 Chrome 里开启了“下载前询问每个文件的保存位置”，浏览器仍可能弹出保存对话框。</p>
+      </section>
+    </main>
+
+    <script type="module" src="../options.js"></script>
+  </body>
+</html>
