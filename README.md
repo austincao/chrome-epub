@@ -46,7 +46,7 @@
 如果您想自行构建：
 ```bash
 # 克隆仓库
-git clone https://github.com/AustinCao/chrome-epub.git
+git clone https://github.com/austincao/chrome-epub.git
 cd chrome-epub
 
 # 安装依赖
@@ -77,7 +77,7 @@ npm run build
 
 ## 🤝 贡献与反馈
 
-如果您在使用过程中遇到问题，或者有更好的改进建议，欢迎提交 [Issue](https://github.com/AustinCao/chrome-epub/issues) 或发起 [Pull Request](https://github.com/AustinCao/chrome-epub/pulls)。
+如果您在使用过程中遇到问题，或者有更好的改进建议，欢迎提交 [Issue](https://github.com/austincao/chrome-epub/issues) 或发起 [Pull Request](https://github.com/austincao/chrome-epub/pulls)。
 
 ---
 
