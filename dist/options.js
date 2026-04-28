@@ -4,6 +4,7 @@ var DEFAULT_OPTIONS = Object.freeze({
   includeImages: true,
   includeLinks: true,
   preserveColors: true,
+  preserveFontSize: true,
   preserveTextTransform: true,
   saveAs: false
 });
@@ -20,6 +21,7 @@ function normalizeOptions(raw = {}) {
     includeImages: raw.includeImages !== false,
     includeLinks: raw.includeLinks !== false,
     preserveColors: raw.preserveColors !== false,
+    preserveFontSize: raw.preserveFontSize !== false,
     preserveTextTransform: raw.preserveTextTransform !== false,
     saveAs: raw.saveAs === true
   };
@@ -44,6 +46,7 @@ var downloadFolderInput = document.getElementById("download-folder");
 var includeImagesInput = document.getElementById("include-images");
 var includeLinksInput = document.getElementById("include-links");
 var preserveColorsInput = document.getElementById("preserve-colors");
+var preserveFontSizeInput = document.getElementById("preserve-font-size");
 var preserveTextTransformInput = document.getElementById("preserve-text-transform");
 var saveAsInput = document.getElementById("save-as");
 init().catch((error) => {
@@ -63,6 +66,7 @@ form.addEventListener("submit", async (event) => {
       includeImages: includeImagesInput.checked,
       includeLinks: includeLinksInput.checked,
       preserveColors: preserveColorsInput.checked,
+      preserveFontSize: preserveFontSizeInput.checked,
       preserveTextTransform: preserveTextTransformInput.checked,
       saveAs: saveAsInput.checked
     });
@@ -78,6 +82,7 @@ function render(options) {
   includeImagesInput.checked = options.includeImages;
   includeLinksInput.checked = options.includeLinks;
   preserveColorsInput.checked = options.preserveColors;
+  preserveFontSizeInput.checked = options.preserveFontSize;
   preserveTextTransformInput.checked = options.preserveTextTransform;
   saveAsInput.checked = options.saveAs;
 }

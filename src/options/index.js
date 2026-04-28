@@ -6,6 +6,7 @@ const downloadFolderInput = document.getElementById("download-folder");
 const includeImagesInput = document.getElementById("include-images");
 const includeLinksInput = document.getElementById("include-links");
 const preserveColorsInput = document.getElementById("preserve-colors");
+const preserveFontSizeInput = document.getElementById("preserve-font-size");
 const preserveTextTransformInput = document.getElementById("preserve-text-transform");
 const saveAsInput = document.getElementById("save-as");
 
@@ -29,6 +30,7 @@ form.addEventListener("submit", async (event) => {
       includeImages: includeImagesInput.checked,
       includeLinks: includeLinksInput.checked,
       preserveColors: preserveColorsInput.checked,
+      preserveFontSize: preserveFontSizeInput.checked,
       preserveTextTransform: preserveTextTransformInput.checked,
       saveAs: saveAsInput.checked,
     });
@@ -45,6 +47,7 @@ function render(options) {
   includeImagesInput.checked = options.includeImages;
   includeLinksInput.checked = options.includeLinks;
   preserveColorsInput.checked = options.preserveColors;
+  preserveFontSizeInput.checked = options.preserveFontSize;
   preserveTextTransformInput.checked = options.preserveTextTransform;
   saveAsInput.checked = options.saveAs;
 }

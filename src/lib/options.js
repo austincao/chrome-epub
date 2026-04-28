@@ -3,6 +3,7 @@ export const DEFAULT_OPTIONS = Object.freeze({
   includeImages: true,
   includeLinks: true,
   preserveColors: true,
+  preserveFontSize: true,
   preserveTextTransform: true,
   saveAs: false,
 });
@@ -27,6 +28,7 @@ export function normalizeOptions(raw = {}) {
     includeImages: raw.includeImages !== false,
     includeLinks: raw.includeLinks !== false,
     preserveColors: raw.preserveColors !== false,
+    preserveFontSize: raw.preserveFontSize !== false,
     preserveTextTransform: raw.preserveTextTransform !== false,
     saveAs: raw.saveAs === true,
   };

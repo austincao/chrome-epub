@@ -2100,6 +2100,7 @@
     includeImages: true,
     includeLinks: true,
     preserveColors: true,
+    preserveFontSize: true,
     preserveTextTransform: true,
     saveAs: false
   });
@@ -2116,6 +2117,7 @@
       includeImages: raw.includeImages !== false,
       includeLinks: raw.includeLinks !== false,
       preserveColors: raw.preserveColors !== false,
+      preserveFontSize: raw.preserveFontSize !== false,
       preserveTextTransform: raw.preserveTextTransform !== false,
       saveAs: raw.saveAs === true
     };
@@ -2180,18 +2182,19 @@
   var STYLE_PROPERTIES = /* @__PURE__ */ new Set([
     "background-color",
     "color",
+    "font-size",
     "font-style",
     "font-weight",
     "text-align",
     "text-decoration",
     "text-transform"
   ]);
-  var SAFE_CSS_VALUE = /^[#(),.%/\-+\w\s]+$/;
+  var SAFE_CSS_VALUE = /^[#(),.%/\-+\w\s'"!]+$/;
   function extractArticleFromPage(options) {
-    const preparedDocument = document.cloneNode(true);
-    prepareDocumentForReadability(preparedDocument);
-    const reader = new import_readability.Readability(preparedDocument, {
-      keepClasses: false
+    const styleFlattenedDocument = options.preserveColors || options.preserveFontSize ? captureImportantComputedStyles(document, options) : document.cloneNode(true);
+    prepareDocumentForReadability(styleFlattenedDocument);
+    const reader = new import_readability.Readability(styleFlattenedDocument, {
+      keepClasses: true
     });
     const readabilityArticle = reader.parse() ?? buildFallbackArticle();
     const headingTitle = readHeadingTitle();
@@ -2342,7 +2345,8 @@
         attributes.push(`rowspan="${rowspan}"`);
       }
     }
-    const styleValue = filterInlineStyle(node.getAttribute("style"), tagName, state.options);
+    const rawStyle = node.getAttribute("data-epub-style") || node.getAttribute("style");
+    const styleValue = filterInlineStyle(rawStyle, tagName, state.options);
     if (styleValue) {
       attributes.push(`style="${escapeAttribute(styleValue)}"`);
     }
@@ -2444,6 +2448,46 @@
     const firstCandidate = value.split(",")[0] || "";
     return firstCandidate.trim().split(/\s+/)[0] || "";
   }
+  function captureImportantComputedStyles(doc, options) {
+    const clone = doc.cloneNode(true);
+    const originalElements = doc.querySelectorAll("span, b, i, strong, em, font, p, div, h1, h2, h3, h4, h5, h6, code, pre");
+    const clonedElements = clone.querySelectorAll("span, b, i, strong, em, font, p, div, h1, h2, h3, h4, h5, h6, code, pre");
+    const count = Math.min(originalElements.length, clonedElements.length);
+    for (let i = 0; i < count; i++) {
+      const orig = originalElements[i];
+      const cloned = clonedElements[i];
+      const style = window.getComputedStyle(orig);
+      const inlineStyles = [];
+      if (options.preserveColors) {
+        const color = style.color;
+        if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") {
+          inlineStyles.push(`color: ${color}`);
+        }
+        const bgColor = style.backgroundColor;
+        if (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent") {
+          inlineStyles.push(`background-color: ${bgColor}`);
+        }
+      }
+      if (options.preserveFontSize) {
+        const fontSize = style.fontSize;
+        if (fontSize && fontSize !== "16px") {
+          inlineStyles.push(`font-size: ${fontSize}`);
+        }
+      }
+      const fontWeight = style.fontWeight;
+      if (fontWeight && fontWeight !== "400" && fontWeight !== "normal") {
+        inlineStyles.push(`font-weight: ${fontWeight}`);
+      }
+      if (inlineStyles.length > 0) {
+        const existing = cloned.getAttribute("style") || "";
+        const fullStyle = (existing ? existing.endsWith(";") ? existing : existing + "; " : "") + inlineStyles.join("; ");
+        cloned.setAttribute("data-epub-style", fullStyle);
+        const existingClass = cloned.getAttribute("class") || "";
+        cloned.setAttribute("class", (existingClass ? existingClass + " " : "") + "epub-preserve-style");
+      }
+    }
+    return clone;
+  }
   function filterInlineStyle(styleValue, tagName, options) {
     if (!styleValue) {
       return "";
@@ -2455,15 +2499,24 @@
         continue;
       }
       const property = rawProperty.trim().toLowerCase();
-      const value = rawValueParts.join(":").trim();
+      let value = rawValueParts.join(":").trim();
       if (!STYLE_PROPERTIES.has(property) || !isSafeCssValue(property, value)) {
         continue;
       }
       if ((property === "color" || property === "background-color") && !options.preserveColors) {
         continue;
       }
+      if (property === "font-size" && !options.preserveFontSize) {
+        continue;
+      }
       if (property === "text-transform" && !options.preserveTextTransform) {
         continue;
+      }
+      if (property === "font-size" && value.endsWith("px")) {
+        const px = parseFloat(value);
+        if (px > 0) {
+          value = (px / 16).toFixed(2) + "em";
+        }
       }
       if (property === "text-align" && !["div", "figcaption", "figure", "h1", "h2", "h3", "h4", "h5", "h6", "p", "pre", "td", "th"].includes(tagName)) {
         continue;
@@ -2481,6 +2534,9 @@
     }
     if (property === "font-style") {
       return /^(normal|italic|oblique)$/i.test(value);
+    }
+    if (property === "font-size") {
+      return /^[0-9.]+(px|em|rem|%|pt)$/i.test(value);
     }
     if (property === "text-decoration") {
       return /^(none|underline|overline|line-through|underline line-through|line-through underline)$/i.test(value);

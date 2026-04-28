@@ -46,6 +46,7 @@ const UNWRAP_TAGS = new Set(["section"]);
 const STYLE_PROPERTIES = new Set([
   "background-color",
   "color",
+  "font-size",
   "font-style",
   "font-weight",
   "text-align",
@@ -53,14 +54,19 @@ const STYLE_PROPERTIES = new Set([
   "text-transform",
 ]);
 
-const SAFE_CSS_VALUE = /^[#(),.%/\-+\w\s]+$/;
+const SAFE_CSS_VALUE = /^[#(),.%/\-+\w\s'"!]+$/;
 
 export function extractArticleFromPage(options) {
-  const preparedDocument = document.cloneNode(true);
-  prepareDocumentForReadability(preparedDocument);
+  // Capture important computed styles and bake them into inline styles
+  // before Readability or sanitization strips them.
+  const styleFlattenedDocument = (options.preserveColors || options.preserveFontSize)
+    ? captureImportantComputedStyles(document, options)
+    : document.cloneNode(true);
 
-  const reader = new Readability(preparedDocument, {
-    keepClasses: false,
+  prepareDocumentForReadability(styleFlattenedDocument);
+
+  const reader = new Readability(styleFlattenedDocument, {
+    keepClasses: true,
   });
 
   const readabilityArticle = reader.parse() ?? buildFallbackArticle();
@@ -243,7 +249,8 @@ function sanitizeNode(node, state, context) {
     }
   }
 
-  const styleValue = filterInlineStyle(node.getAttribute("style"), tagName, state.options);
+  const rawStyle = node.getAttribute("data-epub-style") || node.getAttribute("style");
+  const styleValue = filterInlineStyle(rawStyle, tagName, state.options);
   if (styleValue) {
     attributes.push(`style="${escapeAttribute(styleValue)}"`);
   }
@@ -371,6 +378,61 @@ function pickFirstSrcSetCandidate(value) {
   return firstCandidate.trim().split(/\s+/)[0] || "";
 }
 
+function captureImportantComputedStyles(doc, options) {
+  const clone = doc.cloneNode(true);
+  const originalElements = doc.querySelectorAll("span, b, i, strong, em, font, p, div, h1, h2, h3, h4, h5, h6, code, pre");
+  const clonedElements = clone.querySelectorAll("span, b, i, strong, em, font, p, div, h1, h2, h3, h4, h5, h6, code, pre");
+
+  const count = Math.min(originalElements.length, clonedElements.length);
+  for (let i = 0; i < count; i++) {
+    const orig = originalElements[i];
+    const cloned = clonedElements[i];
+
+    const style = window.getComputedStyle(orig);
+    const inlineStyles = [];
+
+    if (options.preserveColors) {
+      // Capture color if it's not transparent
+      const color = style.color;
+      if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") {
+        inlineStyles.push(`color: ${color}`);
+      }
+
+      // Capture background-color for highlighting
+      const bgColor = style.backgroundColor;
+      if (bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent") {
+        inlineStyles.push(`background-color: ${bgColor}`);
+      }
+    }
+
+    if (options.preserveFontSize) {
+      // Capture font-size
+      const fontSize = style.fontSize;
+      if (fontSize && fontSize !== "16px") {
+        inlineStyles.push(`font-size: ${fontSize}`);
+      }
+    }
+
+    // Capture explicit font-weight
+    const fontWeight = style.fontWeight;
+    if (fontWeight && fontWeight !== "400" && fontWeight !== "normal") {
+      inlineStyles.push(`font-weight: ${fontWeight}`);
+    }
+
+    if (inlineStyles.length > 0) {
+      const existing = cloned.getAttribute("style") || "";
+      const fullStyle = (existing ? (existing.endsWith(";") ? existing : existing + "; ") : "") + inlineStyles.join("; ");
+      cloned.setAttribute("data-epub-style", fullStyle);
+      
+      // Add a marker class to prevent Readability from unwrapping this element
+      const existingClass = cloned.getAttribute("class") || "";
+      cloned.setAttribute("class", (existingClass ? existingClass + " " : "") + "epub-preserve-style");
+    }
+  }
+
+  return clone;
+}
+
 function filterInlineStyle(styleValue, tagName, options) {
   if (!styleValue) {
     return "";
@@ -384,7 +446,7 @@ function filterInlineStyle(styleValue, tagName, options) {
     }
 
     const property = rawProperty.trim().toLowerCase();
-    const value = rawValueParts.join(":").trim();
+    let value = rawValueParts.join(":").trim();
     if (!STYLE_PROPERTIES.has(property) || !isSafeCssValue(property, value)) {
       continue;
     }
@@ -393,8 +455,21 @@ function filterInlineStyle(styleValue, tagName, options) {
       continue;
     }
 
+    if (property === "font-size" && !options.preserveFontSize) {
+      continue;
+    }
+
     if (property === "text-transform" && !options.preserveTextTransform) {
       continue;
+    }
+
+    // Convert px to em for better accessibility on e-readers
+    if (property === "font-size" && value.endsWith("px")) {
+      const px = parseFloat(value);
+      if (px > 0) {
+        // Use 16px as base for 1em
+        value = (px / 16).toFixed(2) + "em";
+      }
     }
 
     if (property === "text-align" && !["div", "figcaption", "figure", "h1", "h2", "h3", "h4", "h5", "h6", "p", "pre", "td", "th"].includes(tagName)) {
@@ -418,6 +493,10 @@ function isSafeCssValue(property, value) {
 
   if (property === "font-style") {
     return /^(normal|italic|oblique)$/i.test(value);
+  }
+
+  if (property === "font-size") {
+    return /^[0-9.]+(px|em|rem|%|pt)$/i.test(value);
   }
 
   if (property === "text-decoration") {
